@@ -88,6 +88,7 @@ def train(dataloader, encoder, decoder, enc_optimizer, dec_optimizer, loss_fn,
     print("Starting training")
     start = time.time()
 
+    save_paths = []
     for epoch in range(n_epochs):
         enc_path = f"{save_path}_ENC({today_now})E{epoch+1}"
         dec_path = f"{save_path}_DEC({today_now})E{epoch+1}"
@@ -106,6 +107,10 @@ def train(dataloader, encoder, decoder, enc_optimizer, dec_optimizer, loss_fn,
         print("Model saved to:")
         print(enc_path)
         print(dec_path)
+
+        save_paths.append((enc_path, dec_path))
+
+    return save_paths
 
 
 def evaluate(dataloader, encoder, decoder):
