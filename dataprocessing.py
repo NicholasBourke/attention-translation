@@ -20,8 +20,8 @@ class Language:
         self.name = name
         self.word2index = {}
         self.word2count = {}
-        self.index2word = {0: "PAD", 1: "SOS", 2:"EOS"}
-        self.n_words = 3
+        self.index2word = {0: "PAD", 1: "SOS", 2: "EOS"}
+        self.n_words = 2
 
     def add_sentence(self, sentence):
         # adds all words in sentence to language
@@ -136,6 +136,54 @@ with open("data/english.pkl", "wb") as e:
     pickle.dump(english, e)
 e.close()
 
+
+
+
+
+
+
+# Split dataset by sentence length
+
+def filter_length(pairs, T_max):
+    """Filters list of sentence pairs by sentence length"""
+    short_pairs = [pair for pair in pairs if len(pair[0].split(" ")) < (T_max-2) and len(pair[1].split(" ")) < (T_max-2)]
+    return short_pairs
+    
+def max_length(pair):
+    """Determines max length of a sentence pair (incl. SOS and EOS)"""
+    return max(len(pair[0].split(" ")), len(pair[1].split(" "))) + 2
+
+def filter_max_length(pairs, a, b):
+    """Filters list of sentence pairs by max sentence length range"""
+    return [pair for pair in pairs if max_length(pair) >= a and max_length(pair) < b]
+
+def count_max_length(L, load_path):
+    """Counts number of pairs with max sentence length between range points in L"""
+    lines = io.open(load_path, encoding='utf-8').read().strip().split("\n")
+    pairs = [line.split("\t") for line in lines]
+
+    counts = []
+    for l in range(L+1):
+        pairs_l = [pair for pair in pairs if max_length(pair) == l]
+        counts.append(len(pairs_l))
+    return counts
+
+def length_split(breaks, path):
+    """Creates datasets split by max sentence length"""
+    load_path = path + ".txt"
+    lines = io.open(load_path, encoding='utf-8').read().strip().split("\n")
+    pairs = [line.split("\t") for line in lines]
+
+    for i in range(len(breaks)-1):
+        print(f"writing {breaks[i]} to {breaks[i+1]-1}")
+        pairs_ab = filter_max_length(pairs, breaks[i], breaks[i+1])
+        print(len(pairs_ab))
+        save_path_ab = f"{path}_T={breaks[i]}-{breaks[i+1]-1}.txt"
+        lines_ab = io.open(save_path_ab, "w")
+        for pair in pairs_ab:
+            line = pair[0]+"\t"+pair[1]+"\n"
+            lines_ab.write(line)
+        lines_ab.close()
 
 
 
